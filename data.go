@@ -38,12 +38,14 @@ func NewEnv(username string) *Environment {
 
 func (env *Environment) DeletePair(key string) {
 	delete(env.Pairs, key)
+	env.aof.WriteCommand("DeletePair", key)
 }
 
 func (env *Environment) DeleteAllPairs() {
 	for k := range env.Pairs {
 		delete(env.Pairs, k)
 	}
+	env.aof.WriteCommand("DeleteAllPairs")
 }
 
 func (env *Environment) GetPair(key string) string {
@@ -61,6 +63,7 @@ func (env *Environment) SetPair(key, val string) {
 
 func (env *Environment) DeleteHash(key string) {
 	delete(env.Hash, key)
+	env.aof.WriteCommand("DeleteHash", key)
 }
 
 func (env *Environment) DeleteHashVal(key1, key2 string) bool {
@@ -68,6 +71,7 @@ func (env *Environment) DeleteHashVal(key1, key2 string) bool {
 		return false
 	}
 	delete(env.Hash[key1], key2)
+	env.aof.WriteCommand("DeleteHashVal", key1, key2)
 	return true
 }
 
@@ -75,6 +79,7 @@ func (env *Environment) DeleteAllHash() {
 	for k := range env.Hash {
 		delete(env.Hash, k)
 	}
+	env.aof.WriteCommand("DeleteAllHash")
 }
 
 func (env *Environment) GetAllHash(key string) map[string]string {
@@ -128,6 +133,16 @@ func (env *Environment) Restore() error {
 			env.SetPair(cmd.Args[0].(string), cmd.Args[1].(string))
 		case "SetHash":
 			env.SetHash(cmd.Args[0].(string), cmd.Args[1].(map[string]string))
+		case "DeleteHash":
+			env.DeleteHash(cmd.Args[0].(string))
+		case "DeleteHashVal":
+			env.DeleteHashVal(cmd.Args[0].(string), cmd.Args[1].(string))
+		case "DeleteAllHash":
+			env.DeleteAllHash()
+		case "DeletePair":
+			env.DeletePair(cmd.Args[0].(string))
+		case "DeleteAllPairs":
+			env.DeleteAllPairs()
 		default:
 			return fmt.Errorf("illegal function name (%s) was written into Aof", cmd.FuncName)
 		}

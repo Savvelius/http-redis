@@ -120,6 +120,21 @@ func (aof *Aof) WriteCommand(funcName string, args ...any) error {
 	return nil
 }
 
+func (aof *Aof) Clear() error {
+	aof.mu.Lock()
+	defer aof.mu.Unlock()
+
+	if err := aof.file.Truncate(0); err != nil {
+		return err
+	}
+
+	if _, err := aof.file.Seek(0, 0); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (aof *Aof) Terminate() error {
 	aof.mu.Lock()
 	defer aof.mu.Unlock()

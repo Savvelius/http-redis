@@ -1,8 +1,8 @@
 package main
 
 import (
+	"bytes"
 	"net/http"
-	"strings"
 	"testing"
 )
 
@@ -13,12 +13,12 @@ func TestServer(t *testing.T) {
 	resp.Body.Close()
 
 	resp, err = http.Post("http://localhost:8000/sava:1234/pairs/key1",
-		"application/json", strings.NewReader("\"value1\""))
+		"application/json", bytes.NewBufferString("\"value1\""))
 	testStatusCode(t, err, resp.StatusCode, http.StatusOK)
 	resp.Body.Close()
 
 	resp, err = http.Post("http://localhost:8000/sava:1234/pairs/key2",
-		"application/json", strings.NewReader("\"value2\""))
+		"application/json", bytes.NewBufferString("\"value2\""))
 	testStatusCode(t, err, resp.StatusCode, http.StatusOK)
 	resp.Body.Close()
 
